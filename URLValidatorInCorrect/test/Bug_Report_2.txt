@@ -1,0 +1,45 @@
+
+------------------------------------BUG Report 2-----------------------------------------
+Bug Name: ALLOW_LOCAL_URLS Option not Enabling
+Bug ID: 00002
+Test Function: UrlValidator.isValid
+Version: 1.4
+Revision: 1783203
+Severity: HIGH
+Reported By: Kevin Lewis
+Report Date: 03/15/2018
+Environment: Eclipse IDE
+
+Description: Valid local addresses fail When the ALLOW_LOCAL_URLS option is enabled within the constructor.
+
+Steps to Reproduce: 
+1. Create a new instance of the UrlValidator with the ALLOW_LOCAL_URLS option included.
+2. Test a valid local address. (See test case below) 
+
+Test Case Information:
+http://localhost/ junit.framework.AssertionFailedError: expected:<true> but was:<false>
+
+Applicable Test Code:
+
+	   // Set up a validator that also accepts two slashes
+	   UrlValidator urlValTwoSlash = new UrlValidator(null, null, UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_LOCAL_URLS);
+	   
+	   String[] trueURLsTwoSlash = {"http://www.google.com/test//testfile", // Typical 
+               "http://localhost/", // Typical with slash
+               "http://machine/", // local address
+               "http://localhost:8000", // with ports
+               "http://machine:0",
+               };
+	   
+...
+	   
+	   // Run through the true URLs with the two slash option
+	   for(int i = 0; i < trueURLsTwoSlash.length; i++) 
+	   {
+		   customAssert(trueURLsTwoSlash[i], true, urlValTwoSlash.isValid(trueURLsTwoSlash[i]));
+	   }
+        
+
+------------------------------------END OF BUG REPORT ------------------------------------
+
+

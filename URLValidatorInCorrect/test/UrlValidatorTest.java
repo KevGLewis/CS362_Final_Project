@@ -38,28 +38,47 @@ public class UrlValidatorTest extends TestCase {
 	   // Set up the validator to accept all schemes
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES );
 	   
+	   // Set up a validator that also accepts two slashes
+	   UrlValidator urlValTwoSlash = new UrlValidator(null, null, UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_LOCAL_URLS);
+	   
+	   String[] trueURLsTwoSlash = {"http://www.google.com/test//testfile", // Typical 
+               "http://localhost/", // Typical with slash
+               "http://machine/", // local address
+               "http://localhost:8000", // with ports
+               "http://machine:0",
+               };
+	   
 	   // Insert the manual URls that we are going to test
 	   String[] trueURLS = {"http://www.google.com", // Typical 
 	                       "http://www.google.com/", // Typical with slash
 	                       "http://0.0.0.0/", // local address
 	                       "http://www.google.com/test", // With a 
 	                       "http://stackoverflow.com/", // No Domain
-	                       "www.stackoverflow.com/test/testTwo/test/test/test/test/test/test/testFile" // A long domain
+	                       "http://www.google.com/test/test/test/test/test/test/testFile", // A long domain with scheme
+	                       "http://www.google.com/test?action=view",
+	                       "http://www.google.com/#/",// Path option with symbol
+	        			   	   "http://www.google.com/23/",
+	                       "http://www.google.ceo", // Several TLD
+	                       "http://www.google.food",
+	                       "http://www.google.com:0", // Good Ports
+	                       "http://www.google.com:6000"
 	                       };
 	   
 	   // List all of the URLs we are going to manually test
-	   String[] falseURLS = {"http://www.google.cm/", // Bad TLD
-			   "http://www.google.cmo/", // verify bad TLD
-			   "www.google.jdifj", // Checking different bad TLD cases
-			   "www.google.jdifj/",
+	   String[] falseURLS = {"http://www.google.cmx/", // Bad TLD
+			   "http://www.google.aaab", // verify bad TLD
+			   "http://www.google.jdifj", // Checking different bad TLD cases
+			   "http://www.google.jdifj/",
 			   "http://www.google.jdifj/",
 			   "htp:/www.google.com/", // Incorrect Scheme Variations
 			   "http:/www.google.com/",
-			   "http:www.google.com/",
-			   "www.google.com/#/", //Path Options
-			   "www.google.com/23/",
-			   "255.255.255.255" // No Scheme
-			   
+			   "http:/www.google.com/#", //address with incorrect path option",
+			   "255.255.255.255", // No Scheme
+			   "http://256.256.256.256", // Impossible IP address
+			   "http://www.google.com/..//file", // Testing dots in the file
+			   "http://www.google.com:-1", // Bad Ports
+			   "http://www.google.com:65a", 
+			   "http://www.google.com/test//testfile" // Try two Slashes
 			   };
 	   
 	   // Run through the true URLs
@@ -72,6 +91,12 @@ public class UrlValidatorTest extends TestCase {
 	   for(int i = 0; i < falseURLS.length; i++) 
 	   {
 		   customAssert(falseURLS[i], false, urlVal.isValid(falseURLS[i]));
+	   }
+	   
+	   // Run through the true URLs with the two slash option
+	   for(int i = 0; i < trueURLsTwoSlash.length; i++) 
+	   {
+		   customAssert(trueURLsTwoSlash[i], true, urlValTwoSlash.isValid(trueURLsTwoSlash[i]));
 	   }
 	  
    }
