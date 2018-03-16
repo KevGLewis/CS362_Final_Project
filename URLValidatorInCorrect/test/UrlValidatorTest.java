@@ -38,14 +38,18 @@ public class UrlValidatorTest extends TestCase {
 	   // Set up the validator to accept all schemes
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES );
 	   
-	   // Set up a validator that also accepts two slashes
-	   UrlValidator urlValTwoSlash = new UrlValidator(null, null, UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_LOCAL_URLS);
+	   customAssert("http://www.google.aaab", false, urlVal.isValid("http://www.google.aaab"));
 	   
-	   String[] trueURLsTwoSlash = {"http://www.google.com/test//testfile", // Typical 
+	   
+	   // Set up a validator that also accepts two slashes
+	   UrlValidator urlValTwoSlash = new UrlValidator(null, null, UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_LOCAL_URLS + UrlValidator.ALLOW_ALL_SCHEMES);
+	   
+	   String[] trueURLsTwoSlash = { // Typical 
                "http://localhost/", // Typical with slash
                "http://machine/", // local address
                "http://localhost:8000", // with ports
                "http://machine:0",
+               "http://www.google.com/test//testfile"
                };
 	   
 	   // Insert the manual URls that we are going to test
@@ -98,6 +102,7 @@ public class UrlValidatorTest extends TestCase {
 	   {
 		   customAssert(trueURLsTwoSlash[i], true, urlValTwoSlash.isValid(trueURLsTwoSlash[i]));
 	   }
+	   
 	  
    }
    
