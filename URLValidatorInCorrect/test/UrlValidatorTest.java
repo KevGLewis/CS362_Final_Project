@@ -36,20 +36,32 @@ public class UrlValidatorTest extends TestCase {
    {
 //You can use this function to implement your manual testing	  
 	   // Set up the validator to accept all schemes
-	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES );
+	   UrlValidator urlVal = new UrlValidator();
 	   
-	   customAssert("http://www.google.aaab", false, urlVal.isValid("http://www.google.aaab"));
+	  customAssert("http://www.google.aaab", false, urlVal.isValid("http://www.google.aaab"));
 	   
+	  //Test the custom scheme functionality
+	  String[] schemes = {"testone","xxxyyy"};
+	  UrlValidator urlValCustScheme = new UrlValidator(schemes);
+	  
+	  customAssert("testone://www.google.com", true,urlValCustScheme.isValid("testone://www.google.com"));
+	  customAssert("xxxyyy://www.google.com/", true,urlValCustScheme.isValid("xxxyyy://www.google.com/"));
+	  customAssert("http://www.google.com/", false,urlValCustScheme.isValid("http://www.google.com/"));
 	   
-	   // Set up a validator that also accepts two slashes
-	   UrlValidator urlValTwoSlash = new UrlValidator(null, null, UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_LOCAL_URLS + UrlValidator.ALLOW_ALL_SCHEMES);
+	   // Set up a validator that also accepts two slashes and the Local URLs, testing these options
+	   UrlValidator urlValTwoSlash = new UrlValidator(null, null, UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_LOCAL_URLS);
 	   
+	   customAssert("ftp://www.google.com/test//testfile", true,urlValTwoSlash.isValid("ftp://www.google.com/test//testfile"));
+	  
 	   String[] trueURLsTwoSlash = { // Typical 
                "http://localhost/", // Typical with slash
                "http://machine/", // local address
                "http://localhost:8000", // with ports
+               "ftp://localhost:8000",
                "http://machine:0",
-               "http://www.google.com/test//testfile"
+               "http://www.google.com/test//testfile",
+               "ftp://www.google.com/test//testfile",
+               "ftp://www.google.com/file1//test2//test3"
                };
 	   
 	   // Insert the manual URls that we are going to test
@@ -58,6 +70,7 @@ public class UrlValidatorTest extends TestCase {
 	                       "http://0.0.0.0/", // local address
 	                       "http://www.google.com/test", // With a 
 	                       "http://stackoverflow.com/", // No Domain
+	                       "http://www.google.com/test/test/test/test/test/test/testFile", // A long domain with scheme
 	                       "http://www.google.com/test/test/test/test/test/test/testFile", // A long domain with scheme
 	                       "http://www.google.com/test?action=view",
 	                       "http://www.google.com/#/",// Path option with symbol
@@ -74,15 +87,27 @@ public class UrlValidatorTest extends TestCase {
 			   "http://www.google.jdifj", // Checking different bad TLD cases
 			   "http://www.google.jdifj/",
 			   "http://www.google.jdifj/",
+			   "ftp://www.google.jdifj", // Checking different bad TLD cases
+			   "ftp://www.google.jdifj/",
+			   "ftp://www.google.jdifj/",
 			   "htp:/www.google.com/", // Incorrect Scheme Variations
 			   "http:/www.google.com/",
 			   "http:/www.google.com/#", //address with incorrect path option",
 			   "255.255.255.255", // No Scheme
 			   "http://256.256.256.256", // Impossible IP address
+			   "ftp://256.256.256.256",
 			   "http://www.google.com/..//file", // Testing dots in the file
 			   "http://www.google.com:-1", // Bad Ports
 			   "http://www.google.com:65a", 
-			   "http://www.google.com/test//testfile" // Try two Slashes
+			   "http://www.google.com/test//testfile", // Try two Slashes
+               "http://localhost/", // Typical with slash
+               "http://machine/", // local address
+               "http://localhost:8000", // with ports
+               "ftp://localhost:8000",
+               "http://machine:0",
+               "http://www.google.com/test//testfile",
+               "ftp://www.google.com/test//testfile",
+               "ftp://www.google.com/file1//test2//test3"
 			   };
 	   
 	   // Run through the true URLs
