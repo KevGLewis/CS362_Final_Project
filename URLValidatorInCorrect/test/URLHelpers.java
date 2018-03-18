@@ -3,9 +3,19 @@ import java.util.Random;
 
 public class URLHelpers {
 
+    /*
+        A rudimentary version of the URL validator that does simple checks if the characters
+        in the URL are allowed to be in the parts they are. This will provide the expected result
+        in random testing
+     */
     public static boolean isURLValid(String url) {
         // Must contain :// after scheme
         if (!url.contains("://")) return false;
+
+        // # is the end of the URL. Don't check anything after it
+        if (url.contains("#")) {
+            url = url.substring(0, url.indexOf('#'));
+        }
 
         // Check scheme before ://
         String scheme = url.substring(0, url.indexOf("://"));
@@ -54,6 +64,9 @@ public class URLHelpers {
         return true;
     }
 
+    /*
+        Checks that a given scheme is valid
+     */
     public static boolean isSchemeValid(String scheme) {
         // Must have length at least 1
         if (scheme.length() == 0) return false;
@@ -78,12 +91,19 @@ public class URLHelpers {
         return true;
     }
 
+    /*
+        Checks that a given authority is valid. Can be a host name
+        or IPv4 address
+     */
     public static boolean isAuthorityValid(String authority) {
         if (isIPValid(authority)) return true;
         else if (isHostValid(authority)) return true;
         else return false;
     }
 
+    /*
+        Checks if a given string is a valid IPv4 address
+     */
     public static boolean isIPValid(String ip) {
 
         // If it has a port, check that first
@@ -99,7 +119,7 @@ public class URLHelpers {
             // 3 times, parse out a number and cut off everything through the period
             for (int i = 0; i < 3; i++) {
                 bytes[i] = Integer.parseInt(ip.substring(0, ip.indexOf(".")));
-                ip = ip.substring(ip.indexOf("." + 1));
+                ip = ip.substring(ip.indexOf(".")+1);
             }
             // last time, just parse the remaining number
             bytes[3] = Integer.parseInt(ip);
@@ -117,6 +137,9 @@ public class URLHelpers {
         return true;
     }
 
+    /*
+        Checks that a given string can be a valid host name. Checks the top level domain against a list of registered TLDs
+     */
     public static boolean isHostValid(String host) {
         // First check the port if there is one
         if (host.contains(":")) {
@@ -124,6 +147,11 @@ public class URLHelpers {
             if (!isPortValid(port)) return false;
 
             host = host.substring(0, host.indexOf(":"));
+        }
+
+        // Cut off . at the end
+        if (host.length() >= 1) {
+            if (host.charAt(host.length() - 1) == '.') host = host.substring(0, host.length() - 1);
         }
 
         // If it is a local TDL, it is exempt from the rules below
@@ -137,7 +165,7 @@ public class URLHelpers {
         if (!host.contains(".")) return false;
 
         while (host.contains(".")) {
-            String domain = host.substring(host.indexOf("."));
+            String domain = host.substring(0,host.indexOf("."));
             host = host.substring(host.indexOf(".")+1);
 
             // domain must have at least 1 character
@@ -164,9 +192,12 @@ public class URLHelpers {
         return true;
     }
 
+    /*
+        Checks that a given port number is valid (between 0 and 65535)
+     */
     public static boolean isPortValid(String port) {
-        // Port must have at least 1 digit
-        if (port.length() == 0) return false;
+        // if port is blank, it is accepted
+        if (port.length() == 0) return true;
 
         int portNum = -1;
         // Port must be an integer
@@ -183,6 +214,9 @@ public class URLHelpers {
         return true;
     }
 
+    /*
+        Checks the characters in a string to see if it can be a URL path
+     */
     public static boolean isPathValid(String path) {
         // If there is a path, it has to start with a slash (/)
         if (path.length() > 0) {
@@ -230,40 +264,19 @@ public class URLHelpers {
         return true;
     }
 
+    /*
+        Checks the characters in a string to see if it can be a URL query
+     */
     public static boolean isQueryValid(String query) {
         // Query must start with ?
         if (query.length() > 0) {
             if (query.charAt(0) != '?') return false;
         }
 
-        // Every character in the query must belong to the list below
-        // Reserved, unreserved, or escaped
+        // Characters before pound sign must not be whitespace
+        // Characters after pound sign can be whitespace
         for (int strIndex = 0; strIndex < query.length(); strIndex++) {
-            if (!(
-                    Character.isLetter(query.charAt(strIndex)) ||
-                            Character.isDigit(query.charAt(strIndex)) ||
-                            query.charAt(strIndex) == '-' ||
-                            query.charAt(strIndex) == '_' ||
-                            query.charAt(strIndex) == '.' ||
-                            query.charAt(strIndex) == '!' ||
-                            query.charAt(strIndex) == '~' ||
-                            query.charAt(strIndex) == '*' ||
-                            query.charAt(strIndex) == '\'' ||
-                            query.charAt(strIndex) == '(' ||
-                            query.charAt(strIndex) == ')' ||
-                            query.charAt(strIndex) == '&' ||
-                            query.charAt(strIndex) == ':' ||
-                            query.charAt(strIndex) == '@' ||
-                            query.charAt(strIndex) == '&' ||
-                            query.charAt(strIndex) == '=' ||
-                            query.charAt(strIndex) == '+' ||
-                            query.charAt(strIndex) == '$' ||
-                            query.charAt(strIndex) == ',' ||
-                            query.charAt(strIndex) == ';' ||
-                            query.charAt(strIndex) == '/' ||
-                            query.charAt(strIndex) == '?')) {
-                return false;
-            }
+            if (Character.isWhitespace(query.charAt(strIndex))) return false;
         }
 
         // Else query is valid
@@ -274,6 +287,9 @@ public class URLHelpers {
         Methods to generate random URL components
      */
 
+    /*
+        Produces a random scheme of given size
+     */
     public static String randomValidScheme(int size) {
         Random rand = new Random();
         String scheme = "";
@@ -295,6 +311,9 @@ public class URLHelpers {
         return scheme;
     }
 
+    /*
+        Produce a random IPv4 address
+     */
     public static String randomValidIP() {
         String ip = "";
         Random rand = new Random();
@@ -308,6 +327,9 @@ public class URLHelpers {
         return ip;
     }
 
+    /*
+        Produce a random host name
+     */
     public static String randomValidHost(int maxDomainLength, int numberOfDomains) {
         String host = "";
         Random rand = new Random();
@@ -317,7 +339,7 @@ public class URLHelpers {
             if (randomNum < 26) host += (char)(randomNum + 'a');
             else host += (char)((randomNum - 26) + 'A');
 
-            int domainSize = rand.nextInt(maxDomainLength-1);
+            int domainSize = rand.nextInt(maxDomainLength);
             for (int domainChar = 0; domainChar < domainSize; domainChar++) {
                 randomNum = rand.nextInt(62);
                 if (randomNum < 26) host += (char)(randomNum + 'a');
@@ -340,6 +362,9 @@ public class URLHelpers {
         return randomInteger(0, 65535);
     }
 
+    /*
+        Produces a random URL path. Specify the maximum length per segment and the number of segments
+     */
     public static String randomValidPath(int maxSegmentLength, int numberOfSegments) {
         String path = "";
         Random rand = new Random();
@@ -347,7 +372,7 @@ public class URLHelpers {
         for (int segmentNum = 0; segmentNum < numberOfSegments; segmentNum++) {
             path += '/';
 
-            int segmentSize = rand.nextInt(maxSegmentLength);
+            int segmentSize = rand.nextInt(maxSegmentLength-1) + 1;
             for (int segmentChar = 0; segmentChar < segmentSize; segmentChar++) {
                 int randomNum = rand.nextInt(80);
                 if (randomNum < 26) path += (char)(randomNum + 'a');
@@ -380,6 +405,9 @@ public class URLHelpers {
         return path;
     }
 
+    /*
+        Produces a random URL query of given length
+     */
     public static String randomValidQuery(int size) {
         String query = "";
         Random rand = new Random();
@@ -416,6 +444,9 @@ public class URLHelpers {
         return query;
     }
 
+    /*
+        Produces a random string. Not guaranteed to be valid for any part of a URL
+     */
     // ASCII characters from " " to "~"
     public static String randomString(int size) {
         String randString = "";
@@ -424,7 +455,7 @@ public class URLHelpers {
         int randomNum;
 
         for (int i = 0; i < size; i++) {
-            randomNum = rand.nextInt(125-32) + 32;
+            randomNum = rand.nextInt(126-32);
             randString += (char)(randomNum + ' ');
         }
 
